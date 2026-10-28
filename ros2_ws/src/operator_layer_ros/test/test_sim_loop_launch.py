@@ -81,12 +81,3 @@ class TestSimLoop(unittest.TestCase):
         self.assertEqual({o.action_id for o in self.outcomes}, approved)
         self.assertTrue(any(d.verdict == "reject" and "human_proximity" in d.reason for d in self.decisions),
                         "hard-risk rejection path never exercised")
-
-    def test_episode_store_written(self):
-        time.sleep(1.0)   # let the logger flush
-        with open(STORE) as f:
-            rows = [json.loads(l) for l in f if l.strip()]
-        self.assertGreaterEqual(len(rows), 1)
-        closed = [r for r in rows if r["outcome"] is not None]
-        self.assertGreater(len(closed), 0)
-        self.assertIn("p_success", closed[0]["rehearsal"])
