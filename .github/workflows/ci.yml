@@ -45,16 +45,22 @@ jobs:
       - name: deps
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update 2>&1 | tail -3 || true
+          apt-get install -y --no-install-recommends curl ca-certificates gnupg 2>&1 | tail -2 || true
+          curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+            -o /usr/share/keyrings/ros-archive-keyring.gpg || true
           apt-get update
-          apt-get install -y --no-install-recommends python3-pip python3-colcon-common-extensions \
+          apt-get install -y --no-install-recommends \
+            python3-pip python3-venv python3-colcon-common-extensions \
             ros-${{ matrix.distro }}-launch-testing ros-${{ matrix.distro }}-launch-testing-ros
-          # pip on Humble (22.04) doesn't know --break-system-packages; Jazzy (24.04) requires it
           if pip3 install --help 2>/dev/null | grep -q break-system-packages; then
             pip3 install --break-system-packages ./core
           else
             pip3 install ./core
           fi
+          python3 -c "import operator_layer_core, pydantic, numpy; print('core ok', operator_layer_core.__version__)"
       - name: colcon build
         shell: bash
         run: |
