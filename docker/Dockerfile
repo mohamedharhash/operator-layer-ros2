@@ -1,9 +1,11 @@
 # Operator Layer — ROS 2 Humble, multi-arch (linux/amd64 + linux/arm64).
 #
 # The ros:humble base is published for both architectures, so the same
-# Dockerfile builds for an x86 workstation and a Jetson/ARM robot computer:
+# Dockerfile builds for an x86 workstation and a Jetson/ARM robot computer.
+# Build arm64 on ARM hardware (a Jetson, a Mac, or an ARM runner); CMake's
+# find_library is unreliable for ROS packages under QEMU emulation:
 #
-#   docker buildx build --platform linux/amd64,linux/arm64 -f docker/Dockerfile -t operator-layer:humble .
+#   docker build -f docker/Dockerfile -t operator-layer:humble .
 #
 # Two stages:
 #   builder  — installs deps, builds the colcon workspace
