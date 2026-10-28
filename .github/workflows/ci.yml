@@ -63,17 +63,19 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             ros-${ROS_DISTRO}-ros-base \
             ros-${ROS_DISTRO}-launch-testing ros-${ROS_DISTRO}-launch-testing-ros \
-            python3-colcon-common-extensions python3-pip python3-pytest
+            python3-colcon-common-extensions python3-pip python3-venv python3-pytest
       - name: install core
         run: |
           set -euo pipefail
-          # Ubuntu 22.04 ships pip 22 / setuptools 59, which can't read PEP 621
-          # metadata and build an empty 'UNKNOWN-0.0.0' wheel. Upgrade first.
-          BSP=""
-          pip3 install --help | grep -q break-system-packages && BSP="--break-system-packages"
-          sudo pip3 install $BSP --upgrade "pip>=24" "setuptools>=68" wheel
-          sudo pip3 install $BSP ./core
-          python3 -c "import operator_layer_core; print('core ok', operator_layer_core.__version__)"
+          # A venv that can still see the apt-installed ROS python packages.
+          # Its own pip is fresh, so PEP 621 metadata works on 22.04 and we
+          # never touch Debian-owned packages on 24.04.
+          python3 -m venv --system-site-packages "$HOME/olvenv"
+          "$HOME/olvenv/bin/pip" install --upgrade pip setuptools wheel
+          "$HOME/olvenv/bin/pip" install ./core
+          "$HOME/olvenv/bin/python" -c "import operator_layer_core; print('core ok', operator_layer_core.__version__)"
+          echo "$HOME/olvenv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$HOME/olvenv" >> "$GITHUB_ENV"
       - name: colcon build
         shell: bash
         run: |
