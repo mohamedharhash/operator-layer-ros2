@@ -67,11 +67,12 @@ jobs:
       - name: install core
         run: |
           set -euo pipefail
-          if pip3 install --help | grep -q break-system-packages; then
-            pip3 install --break-system-packages ./core
-          else
-            pip3 install ./core
-          fi
+          # Ubuntu 22.04 ships pip 22 / setuptools 59, which can't read PEP 621
+          # metadata and build an empty 'UNKNOWN-0.0.0' wheel. Upgrade first.
+          BSP=""
+          pip3 install --help | grep -q break-system-packages && BSP="--break-system-packages"
+          sudo pip3 install $BSP --upgrade "pip>=24" "setuptools>=68" wheel
+          sudo pip3 install $BSP ./core
           python3 -c "import operator_layer_core; print('core ok', operator_layer_core.__version__)"
       - name: colcon build
         shell: bash
