@@ -26,7 +26,10 @@ COPY core/ /ws/core/
 RUN pip3 install --no-cache-dir /ws/core
 
 COPY ros2_ws/src/ /ws/ros2_ws/src/
-RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
+# ldconfig: under QEMU (arm64 cross-build) the shared-library cache is stale and
+# CMake can't resolve ROS libs that are present on disk.
+RUN ldconfig \
+    && . /opt/ros/${ROS_DISTRO}/setup.sh \
     && cd /ws/ros2_ws \
     && colcon build --symlink-install --event-handlers console_direct+ \
          --cmake-args -DCMAKE_BUILD_TYPE=Release
