@@ -36,6 +36,10 @@ class ScriptedPolicyNode(Node):
     def tick(self) -> None:
         if 0 <= self.max_actions <= self.i:
             return
+        # Don't publish into the void: wait until at least one subscriber (the gate)
+        # has been discovered, otherwise the first message is lost on DDS startup.
+        if self.pub.get_subscription_count() == 0:
+            return
         if self.i % 10 == 7:
             goal = [0.15, -0.22, 0.05]                     # inside the human zone
         else:
