@@ -7,7 +7,6 @@ logger wrote a non-empty episode store.
 """
 import json
 import os
-import tempfile
 import time
 import unittest
 
@@ -22,12 +21,20 @@ from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
 
 from operator_layer_msgs.msg import Decision, Outcome
 
-STORE = os.path.join(tempfile.mkdtemp(), "episodes.jsonl")
+# launch_testing imports this module in two processes (the launcher and the
+# test runner), so the path must be deterministic, not tempfile.mkdtemp().
+STORE = os.path.join(
+    os.environ.get("RUNNER_TEMP", os.environ.get("TMPDIR", "/tmp")),
+    "operator_layer_launch_test", "episodes.jsonl",
+)
 N_ACTIONS = 30
 
 
 @pytest.mark.launch_test
 def generate_test_description():
+    os.makedirs(os.path.dirname(STORE), exist_ok=True)
+    if os.path.exists(STORE):
+        os.remove(STORE)
     cfg = os.path.join(get_package_share_directory("operator_layer_ros"), "config", "gate.yaml")
     common = dict(package="operator_layer_ros", parameters=[cfg], output="screen")
     nodes = [
