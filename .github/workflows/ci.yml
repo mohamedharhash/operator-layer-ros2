@@ -81,6 +81,11 @@ jobs:
           SITE=$("$HOME/olvenv/bin/python" -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")
           echo "PYTHONPATH=$SITE${PYTHONPATH:+:$PYTHONPATH}" >> "$GITHUB_ENV"
           /usr/bin/python3 -c "import sys; sys.path.insert(0, '$SITE'); import operator_layer_core; print('system python sees core')"
+          # colcon invokes /usr/bin/python3 directly, so expose the venv's
+          # site-packages to the system interpreter as well.
+          SITE=$("$HOME/olvenv/bin/python" -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")
+          echo "PYTHONPATH=$SITE${PYTHONPATH:+:$PYTHONPATH}" >> "$GITHUB_ENV"
+          /usr/bin/python3 -c "import sys; sys.path.insert(0, '$SITE'); import operator_layer_core; print('system python sees core')"
       - name: colcon build
         shell: bash
         run: |
