@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "operator-layer-core"
+version = "0.2.0"
+description = "Rehearse-before-execute gate for learned robot policies: N-rollout simulation, decision policy, episode store, calibration scoring."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Mohamed Harhash" }]
+dependencies = [
+  "numpy>=1.24",
+  "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "pytest-cov", "ruff"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["operator_layer_core*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100

@@ -1,0 +1,46 @@
+# docker compose -f docker/compose.yml up --build sim
+#
+# Services share the host network so `ros2 topic echo` from the host (or a
+# second container) sees the same DDS graph. Episode data lands in ./data.
+services:
+  sim:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: operator-layer:humble
+    network_mode: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+      OL_ROBOT: sim
+    volumes:
+      - ../data:/ws/data
+    command: ros2 launch operator_layer_ros sim.launch.py store_path:=/ws/data/episodes.jsonl
+
+  # Same image, your policy + a real arm. Needs the serial device and OL_ROBOT=so101.
+  so101:
+    image: operator-layer:humble
+    network_mode: host
+    profiles: ["hardware"]
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+      OL_ROBOT: so101
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
+    volumes:
+      - ../data:/ws/data
+    command: >
+      bash -c "ros2 launch operator_layer_ros gate_only.launch.py &
+               ros2 run operator_layer_ros so101_bridge --ros-args -p port:=/dev/ttyACM0;
+               wait"
+
+  # Dev shell with the source mounted, for editing without rebuilding the image.
+  dev:
+    image: operator-layer:humble
+    network_mode: host
+    profiles: ["dev"]
+    volumes:
+      - ..:/ws/src-live
+      - ../data:/ws/data
+    command: bash
+    stdin_open: true
+    tty: true

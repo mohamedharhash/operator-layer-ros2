@@ -1,0 +1,38 @@
+# Gate safety contract. Change these knowingly: they decide when the robot
+# moves without a human in the loop.
+rehearsal_gate:
+  ros__parameters:
+    sim_backend: kinematic_so101
+    n_rollouts: 50
+    approve_threshold: 0.95     # auto-approve at or above this success rate
+    reject_threshold: 0.60      # auto-reject below this
+    max_risk: 0.05              # and no more than this fraction of risky rollouts
+    hard_risks: [human_proximity]
+    operator_timeout_s: 30.0
+    keep_rollouts: false
+    seed: -1                    # -1 = nondeterministic; set for reproducible runs
+
+auto_operator:
+  ros__parameters:
+    approve_if_above: 0.85
+    gate_approve_threshold: 0.95
+    gate_reject_threshold: 0.60
+    gate_max_risk: 0.05
+    hard_risks: [human_proximity]
+
+sim_robot:
+  ros__parameters:
+    robot_name: sim
+    joint_noise_std: 0.012      # worse than the rehearser's sim on purpose
+    grasp_success_base: 0.85
+
+outcome_logger:
+  ros__parameters:
+    store_path: data/episodes.jsonl
+    report_every: 20
+
+scripted_policy:
+  ros__parameters:
+    rate_hz: 2.0
+    max_actions: -1
+    seed: 0
