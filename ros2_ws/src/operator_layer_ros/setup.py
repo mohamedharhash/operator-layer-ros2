@@ -21,7 +21,6 @@ setup(
     maintainer_email="mohamedharhash98@gmail.com",
     description="ROS 2 nodes for the Operator Layer rehearse-before-execute gate.",
     license="MIT",
-    tests_require=["pytest"],
     entry_points={
         "console_scripts": [
             "rehearsal_gate = operator_layer_ros.rehearsal_gate_node:main",

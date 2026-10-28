@@ -72,7 +72,7 @@ jobs:
           # never touch Debian-owned packages on 24.04.
           python3 -m venv --system-site-packages "$HOME/olvenv"
           "$HOME/olvenv/bin/pip" install --upgrade pip setuptools wheel
-          "$HOME/olvenv/bin/pip" install ./core
+          "$HOME/olvenv/bin/pip" install ./core pytest
           "$HOME/olvenv/bin/python" -c "import operator_layer_core; print('core ok', operator_layer_core.__version__)"
           echo "$HOME/olvenv/bin" >> "$GITHUB_PATH"
           echo "VIRTUAL_ENV=$HOME/olvenv" >> "$GITHUB_ENV"
@@ -96,7 +96,7 @@ jobs:
         run: |
           source /opt/ros/${ROS_DISTRO}/setup.bash
           cd ros2_ws && source install/setup.bash
-          colcon test --event-handlers console_direct+ --return-code-on-test-failure
+          colcon test --event-handlers console_direct+ --return-code-on-test-failure --pytest-args -v
       - name: test summary
         if: always()
         shell: bash
