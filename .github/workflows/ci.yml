@@ -72,15 +72,14 @@ jobs:
           # never touch Debian-owned packages on 24.04.
           python3 -m venv --system-site-packages "$HOME/olvenv"
           "$HOME/olvenv/bin/pip" install --upgrade pip setuptools wheel
-          "$HOME/olvenv/bin/pip" install ./core pytest
+          "$HOME/olvenv/bin/pip" install ./core
           "$HOME/olvenv/bin/python" -c "import operator_layer_core; print('core ok', operator_layer_core.__version__)"
-          echo "$HOME/olvenv/bin" >> "$GITHUB_PATH"
-          echo "VIRTUAL_ENV=$HOME/olvenv" >> "$GITHUB_ENV"
-          # colcon invokes /usr/bin/python3 directly, so expose the venv's
-          # site-packages to the system interpreter as well.
+          # Do NOT put the venv on PATH: colcon must run with the system python so
+          # its pytest extension is found. Only expose the venv's site-packages.
           SITE=$("$HOME/olvenv/bin/python" -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")
           echo "PYTHONPATH=$SITE${PYTHONPATH:+:$PYTHONPATH}" >> "$GITHUB_ENV"
           /usr/bin/python3 -c "import sys; sys.path.insert(0, '$SITE'); import operator_layer_core; print('system python sees core')"
+          /usr/bin/python3 -c "import pytest, colcon_core; print('system pytest', pytest.__version__)"
           # colcon invokes /usr/bin/python3 directly, so expose the venv's
           # site-packages to the system interpreter as well.
           SITE=$("$HOME/olvenv/bin/python" -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")
